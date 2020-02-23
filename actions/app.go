@@ -12,7 +12,12 @@ import (
 	csrf "github.com/gobuffalo/mw-csrf"
 	i18n "github.com/gobuffalo/mw-i18n"
 	"github.com/gobuffalo/packr/v2"
+	
+	
+
 )
+
+
 
 // ENV is used to help switch settings based on where the
 // application is being run. Default is "development".
@@ -59,7 +64,55 @@ func App() *buffalo.App {
 		app.Use(translations())
 
 		app.GET("/", HomeHandler)
+	
+		// Named Parameter 
 
+		app.GET("/testparameter", func (c buffalo.Context) error {
+			return c.Render(200, r.String(c.Param("name")))
+		  })
+
+		app.GET("/test", func (c buffalo.Context) error {
+			c.Set("name", "Mark")
+			return c.Render(200, r.String("Hi <%= name %> ini urlnya : <%= usersShowPath() %>"))
+		  })	 
+		
+		// With Parameter
+		app.GET("/test/new", func (c buffalo.Context) error {
+			return c.Render(200, r.String("new"))
+			})
+
+		app.GET("/testparam/{name}", func (c buffalo.Context) error {
+			return c.Render(200, r.String(c.Param("name")))
+		  })
+
+		// Regular Expression
+		app.GET("/testregex/{id:[0-9]+}", func (c buffalo.Context) error {
+			return c.Render(200, r.String(c.Param("id")))
+		  })
+		
+		// WITH HANDLER
+		app.GET("/testdanihandler", DaniHandlerwidget)
+
+		// WITH REDIRECT OR WITH REDIRECT PARAMETERS
+		app.GET("/testredirect", func (c buffalo.Context) error {
+			return c.Redirect(307, "widgetsPath()")
+			// Or with parameters
+			// return c.Redirect(307, "widgetPath()", r.Data{"widget_id": "1"})
+		  })
+
+
+		// GROUP
+		// g := app.Group("/api/v1")
+		// g.Use(APIAuthorizer)
+		// g.GET("/testapi", func (c buffalo.Context) error {
+		// // responds to GET /api/v1/testapi
+		// return c.Render(200, r.String(c.Param("name")))
+		// })
+			
+		app.Resource("/widgets", WidgetsResource{})
+		app.GET("/users/show", UsersShow)
+		app.GET("/users/index", UsersIndex)
+		app.GET("/users/create", UsersCreate)
 		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}
 
